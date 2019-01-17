@@ -222,6 +222,81 @@ def test_sub_element2():
     assert "<head>" in file_contents
     assert "</head>" in file_contents
 
+
+def test_title():
+    e = Title("This is a Title")
+
+    file_contents = render_result(e).strip()
+
+    assert "This is a Title" in file_contents
+    print(file_contents)
+    assert file_contents.startswith("<title>")
+    assert file_contents.endswith("</title>")
+    assert "\n" not in file_contents
+
+def test_one_line_tag_append():
+    """
+    You should not be able to append content to a OneLineTag
+    """
+    e = OneLineTag("the initial content")
+    with pytest.raises(NotImplementedError):
+        e.append("some more content")
+
+    file_contents = render_result(e).strip()
+    print(file_contents)
+    # assert False    # to see the print
+
+
+    ########
+    # Step 4
+    ########
+
+def test_attributes():
+    e = P("A paragraph of text", style="text-align: center", id="intro")
+
+    file_contents = render_result(e).strip()
+    print(file_contents)  # so we can see it if the test fails
+
+    # note: The previous tests should make sure that the tags are getting
+    #       properly rendered, so we don't need to test that here.
+    #       so using only a "P" tag is fine
+    assert "A paragraph of text" in file_contents
+    assert 'style="text-align: center"' in file_contents
+    assert 'id="intro"' in file_contents
+    # but make sure the embedded element's tags get rendered!
+    # first test the end tag is there -- same as always:
+    assert file_contents.endswith("</p>")
+
+    # but now the opening tag is far more complex
+    # but it starts the same:
+    assert file_contents.startswith("<p ")
+    assert file_contents[:file_contents.index(">")].count(" ") == 3
+    # just to be sure -- there should be a closing bracket to the opening tag
+    assert file_contents[:-1].index(">") > file_contents.index('id="intro"')
+
+    # assert False
+
+
+
+    ########
+    # Step 5
+    ########
+
+def test_hr():
+    """a simple horizontal rule with no attributes"""
+    hr = Hr()
+    file_contents = render_result(hr)
+    print(file_contents)
+    assert file_contents == '<hr />\n'
+
+
+def test_hr_attr():
+    """a horizontal rule with an attribute"""
+    hr = Hr(width=400)
+    file_contents = render_result(hr)
+    print(file_contents)
+    assert file_contents == '<hr width="400" />\n'
+
 # #####################
 # # indentation testing
 # #  Uncomment for Step 9 -- adding indentation

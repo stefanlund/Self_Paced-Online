@@ -8,11 +8,15 @@ A class-based system for rendering html.
 # This is the framework for the base class
 class Element:
 
-    # tag = "html"
-
-    def __init__(self, content=None, tag="html"):
+    def __init__(self, content=None, tag="html", **kwargs):
         self.contents = [content]
         self.tag = tag
+        self.kwargs = kwargs
+        # print("self.kwargs: ", self.kwargs)
+        # print("self.kwargs.items(): ", self.kwargs.items())
+        # for k in self.kwargs.keys():
+            # print("k: ", k, type(k))
+        # print("self.kwargs.keys(): ", self.kwargs.keys())
 
     def append(self, new_content):
         if self.contents[0] is None:
@@ -21,8 +25,16 @@ class Element:
         return self.contents
 
     def render(self, out_file):
-    # loop through the list of contents:
-        out_file.write("<{}>\n".format(self.tag))
+        # loop through the list of contents:
+        if self.kwargs:
+            out_file.write("<{}".format(self.tag))
+            out_file.write(self.render_with_kwargs())       #######
+            # for k, v in self.kwargs.items():
+            #     out_file.write(' {}="{}"'.format(k, v))
+            out_file.write(">\n")
+        else:
+            out_file.write("<{}>\n".format(self.tag))
+
         for content in self.contents:
             # out_file.write("<{}>\n".format(self.tag))
             # try:
@@ -36,18 +48,17 @@ class Element:
                 out_file.write("\n")
         out_file.write("</{}>\n".format(self.tag))
 
-    # def render(self, out_file):
-    #     # out_file.write("just something as a place holder...")
-    #     # print("self.__dict__: ", self.__dict__)
-    #     # print("self.tag: ", self.tag)
-    #     out_file.write("<{}>\n".format(self.tag))
-    #     for content in self.contents:
-    #         print("content: ", content, type(content))
-    #         out_file.write(content + "\n")
-    #
-    #     out_file.write("</{}>\n".format(self.tag))
+    def render_with_kwargs(self):                       #######
+        string = ""
+        for k, v in self.kwargs.items():
+            string += ' {}="{}"'.format(k, v)
+        return string
 
+    def _open_tag(self):
+        pass
 
+    def _close_tag(self):
+        pass
 
 class Html(Element):
 
@@ -68,10 +79,11 @@ class Body(Element):
 
 class P(Element):
 
-    def __init__(self, content=None, tag="p"):
+    def __init__(self, content=None, tag="p", **kwargs):
         # self.content = content
         self.tag = tag
-        Element.__init__(self, content, tag)
+        self.kwargs = kwargs
+        Element.__init__(self, content, tag, **kwargs)
 
 class Head(Element):
 
@@ -79,36 +91,43 @@ class Head(Element):
         self.tag = tag
         Element.__init__(self, content, tag)
 
-class Title(Element):
 
+class OneLineTag(Element):
+
+    def render(self, out_file):
+        # cont = str(*self.contents)
+        cont = self.contents[0]
+        out_file.write("<{}>{}</{}>\n".format(self.tag, cont, self.tag))
+
+    def append(self, new_content):
+        # If the append method is evoked, NotImplementedError is raised
+        raise NotImplementedError
+
+
+class Title(OneLineTag):
+    # tag = "title"
     def __init__(self, content=None, tag="title"):
         self.tag = tag
-        Element.__init__(self, content, tag)
+        OneLineTag.__init__(self, content, tag)
 
 
+class SelfClosingTag(Element):
 
-# under class Element
-        # def render(self, out_file):
-        #     # and the class objects in the same order
-        #     class_obj = []
-        #
-        #     # start from the top
-        #     current_class = self
-        #     while hasattr(current_class, 'tag'):
-        #         class_obj.append(current_class)
-        #         current_class = current_class.contents[0]
-        #
-        #     for obj in class_obj[:-1]:
-        #         # strings to print are in the content of oject next to last one
-        #         out_file.write("<{}>\n".format(obj.tag))
-        #
-        #     for content_list in class_obj[-2].contents:
-        #         str_cont = content_list.contents[0]
-        #         tg = content_list.tag
-        #         out_file.write("<{tg}>\n{str_cont}\n</{tg}>\n".
-        #                        format(tg=tg, str_cont=str_cont))
-        #     # revers tags to close
-        #     r_class_obj = class_obj[-1]
-        #     r_class_obj.reverse()
-        #     for obj in r_class_obj:
-        #         out_file.write("<{}>\n".format(obj.tag))
+    def render(self, out_file):
+
+        if self.kwargs:
+            out_file.write("<{}".format(self.tag))
+            out_file.write(self.render_with_kwargs())       ########
+            # for k, v in self.kwargs.items():
+            #     out_file.write(' {}="{}"'.format(k, v))
+            out_file.write(" />\n")
+        else:
+            out_file.write("<{} />\n".format(self.tag))
+
+
+class Hr(SelfClosingTag):
+
+    def __init__(self, content=None, tag="hr", **kwargs):
+        self.tag = tag
+        self.kwargs = kwargs
+        SelfClosingTag.__init__(self, content, tag, **kwargs)
