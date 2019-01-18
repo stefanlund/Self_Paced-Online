@@ -12,11 +12,6 @@ class Element:
         self.contents = [content]
         self.tag = tag
         self.kwargs = kwargs
-        # print("self.kwargs: ", self.kwargs)
-        # print("self.kwargs.items(): ", self.kwargs.items())
-        # for k in self.kwargs.keys():
-            # print("k: ", k, type(k))
-        # print("self.kwargs.keys(): ", self.kwargs.keys())
 
     def append(self, new_content):
         if self.contents[0] is None:
@@ -25,16 +20,14 @@ class Element:
         return self.contents
 
     def render(self, out_file):
-        # loop through the list of contents:
-        if self.kwargs:
-            out_file.write("<{}".format(self.tag))
-            out_file.write(self.render_with_kwargs())       #######
-            # for k, v in self.kwargs.items():
-            #     out_file.write(' {}="{}"'.format(k, v))
-            out_file.write(">\n")
-        else:
-            out_file.write("<{}>\n".format(self.tag))
 
+        # if self.kwargs:
+        out_file.write("<{}".format(self.tag))
+        out_file.write(self.render_with_kwargs())
+        out_file.write(">\n")
+        # else:
+            # out_file.write("<{}>\n".format(self.tag))
+        # loop through the list of contents:
         for content in self.contents:
             # out_file.write("<{}>\n".format(self.tag))
             # try:
@@ -48,10 +41,12 @@ class Element:
                 out_file.write("\n")
         out_file.write("</{}>\n".format(self.tag))
 
-    def render_with_kwargs(self):                       #######
+    def render_with_kwargs(self):
+
         string = ""
-        for k, v in self.kwargs.items():
-            string += ' {}="{}"'.format(k, v)
+        if self.kwargs:
+            for k, v in self.kwargs.items():
+                string += ' {}="{}"'.format(k, v)
         return string
 
     def _open_tag(self):
@@ -115,14 +110,24 @@ class SelfClosingTag(Element):
 
     def render(self, out_file):
 
-        if self.kwargs:
-            out_file.write("<{}".format(self.tag))
-            out_file.write(self.render_with_kwargs())       ########
-            # for k, v in self.kwargs.items():
-            #     out_file.write(' {}="{}"'.format(k, v))
-            out_file.write(" />\n")
-        else:
-            out_file.write("<{} />\n".format(self.tag))
+        # if self.kwargs:
+        out_file.write("<{}".format(self.tag))
+        out_file.write(self.render_with_kwargs())
+        out_file.write(" />\n")
+        # else:
+        #     out_file.write("<{} />\n".format(self.tag))
+
+
+    # def render(self, out_file):
+    #
+    #     out_file.write("<{}>\n".format(self.tag))
+    #
+    #     for content in self.contents:
+    #         try:
+    #             content.render(out_file)
+    #         except AttributeError:
+    #             out_file.write(content)
+    #             out_file.write("\n")
 
 
 class Hr(SelfClosingTag):
