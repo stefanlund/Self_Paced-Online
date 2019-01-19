@@ -26,7 +26,6 @@ class Element:
 
     def render(self, out_file):
 
-        # out_file.write(self._open_tag() + self._close_tag())
         out_file.write(self._start_tag())
 
         for content in self.contents:
@@ -40,16 +39,7 @@ class Element:
             else:
                 out_file.write(content)
                 out_file.write("\n")
-        # out_file.write("</{}".format(self.tag) + self._close_tag())
         out_file.write(self._end_tag())
-
-    # def render_with_kwargs(self):
-    #
-    #     string = ""
-    #     if self.kwargs:
-    #         for k, v in self.kwargs.items():
-    #             string += ' {}="{}"'.format(k, v)
-    #     return string
 
     def _start_tag(self):
         string = self._open_tag() + self._close_tag()
@@ -71,84 +61,60 @@ class Element:
         return close_tag
 
 class Html(Element):
-
-    def __init__(self, content=None, tag="html", **kwargs):
-        self.content = content
-        self.tag = tag
-        self.kwargs = kwargs
-        # Element.__init__(self, content, tag, **kwargs)
-        super().__init__(content, tag, **kwargs)
+    tag = "html"
+    def __init__(self, content=None, **kwargs):
+        super().__init__(content, Html.tag, **kwargs)
 
 class Body(Element):
-
-    def __init__(self, content=None, tag="body"):
-        # self.content = content
-        self.tag = tag
-        super().__init__(content, tag)
+    tag = "body"
+    def __init__(self, content=None):
+        super().__init__(content, Body.tag)
 
 class P(Element):
-
-    def __init__(self, content=None, tag="p", **kwargs):
-        # self.content = content
-        self.tag = tag
-        self.kwargs = kwargs
-        super().__init__(content, tag, **kwargs)
+    tag = "p"
+    def __init__(self, content=None, **kwargs):
+        super().__init__(content, P.tag, **kwargs)
 
 class Head(Element):
-
-    def __init__(self, content=None, tag="head"):
-        self.tag = tag
-        super().__init__(content, tag)
+    tag = "head"
+    def __init__(self, content=None):
+        super().__init__(content, Head.tag)
 
 
 class OneLineTag(Element):
+
+    def append(self, new_content):
+        # If the append method is evoked, NotImplementedError is raised
+        raise NotImplementedError
 
     def render(self, out_file):
         # cont = str(*self.contents)
 
         cont = self.contents[0]
         local_start_tag = self._start_tag()[:-1]
-        # out_file.write("<{}>{}</{}>\n".format(self.tag, cont, self.tag))
-        # if self.tag == "title":
-        #     out_file.write(self._start_tag()[:-1] + cont + self._end_tag())
+
         if self.tag == "a":
             local_start_tag = local_start_tag[:-1]
             cont = ">" + cont
-            # out_file.write(self._start_tag()[:2] + cont + self._end_tag())
 
         out_file.write(local_start_tag + cont + self._end_tag())
 
-    def append(self, new_content):
-        # If the append method is evoked, NotImplementedError is raised
-        raise NotImplementedError
-
 
 class Title(OneLineTag):
-    # tag = "title"
-    def __init__(self, content=None, tag="title"):
-        self.tag = tag
-        super().__init__(content, tag)
+    tag = "title"
+    def __init__(self, content=None):
+        super().__init__(content, Title.tag)
 
 class A(OneLineTag):
-
+    tag = "a"
     def __init__(self, link, content=None, **kwargs):
-        self.content = content
-        tag = "a"
         kwargs['href'] = link
-        super().__init__(content, tag, **kwargs)
-
-    # def render(self, out_file):
-    #     # <a href="http://google.com">link</a>
-    #
-    #     cont = self.contents[0]
-    #     out_file.write(self._open_tag() + ">" + cont + "</" + self.tag + self._close_tag())
+        super().__init__(content, A.tag, **kwargs)
 
 
 class SelfClosingTag(Element):
 
     def __init__(self, content, tag, **kwargs):
-        self.tag = tag
-        self.kwargs = kwargs
         # SelfClosingTag element raises an exception if someone tries to put in any content
         if content is not None:
             raise TypeError("SelfClosingTag can not contain any content")
@@ -162,15 +128,11 @@ class SelfClosingTag(Element):
 
 
 class Hr(SelfClosingTag):
-
-    def __init__(self, content=None, tag="hr", **kwargs):
-        self.tag = tag
-        self.kwargs = kwargs
-        super().__init__(content, tag, **kwargs)
+    tag = "hr"
+    def __init__(self, content=None, **kwargs):
+        super().__init__(content, Hr.tag, **kwargs)
 
 class Br(SelfClosingTag):
-
-    def __init__(self, content=None, tag="br", **kwargs):
-        self.tag = tag
-        self.kwargs = kwargs
-        super().__init__(content, tag, **kwargs)
+    tag = "br"
+    def __init__(self, content=None, **kwargs):
+        super().__init__(content, Br.tag, **kwargs)
