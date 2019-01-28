@@ -48,6 +48,7 @@ render_page(page, "test_html_output1.html")
 # The rest of the steps have been commented out.
 #  Uncomment them as you move along with the assignment.
 
+
 # ## Step 2
 # ##########
 
@@ -248,4 +249,4 @@ body.append(list)
 
 page.append(body)
 
-render_page(page, "test_html_output8.html")
+render_page(page, "test_html_output8.html", indent="")
